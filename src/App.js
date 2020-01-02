@@ -39,8 +39,19 @@ const ADD_NEW_BOOK = gql`
       author
       published
       genres
+      id
     }
   }
+`
+
+const EDIT_BIRTHYEAR = gql`
+mutation editBirthyear($name: String!, $born: String!) {
+  editAuthor(name: $name, setBornTo: $born)  {
+    name
+    born
+    id
+  }
+}
 `
 
 const App = () => {
@@ -57,6 +68,7 @@ const App = () => {
       }
     ]
   })
+  const [editAuthor] = useMutation(EDIT_BIRTHYEAR)
 
   return (
     <div>
@@ -69,6 +81,7 @@ const App = () => {
       <Authors
         show={page === 'authors'}
         result={authors}
+        editAuthor={editAuthor}
       />
 
       <Books

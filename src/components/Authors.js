@@ -1,6 +1,7 @@
 import React from 'react'
+import NewBirthYear from './NewBirthYear'
 
-const Authors = ({ show, result }) => {
+const Authors = ({ show, result, editAuthor }) => {
   if (!show) {
     return null
   }
@@ -12,6 +13,7 @@ const Authors = ({ show, result }) => {
   return (
     <div>
       <h2>Authors</h2>
+
       <table>
         <tbody>
           <tr>
@@ -32,7 +34,8 @@ const Authors = ({ show, result }) => {
           )}
         </tbody>
       </table>
-
+      
+      <NewBirthYear editAuthor={editAuthor} />
     </div>
   )
 }
