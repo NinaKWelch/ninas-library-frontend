@@ -35,7 +35,10 @@ const Authors = ({ show, result, editAuthor }) => {
         </tbody>
       </table>
       
-      <NewBirthYear editAuthor={editAuthor} />
+      <NewBirthYear
+        authors={result.data.allAuthors}
+        editAuthor={editAuthor}
+      />
     </div>
   )
 }

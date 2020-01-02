@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
-const NewBirthYear = ({ editAuthor }) => {
-  const [name, setName] = useState('')
+const NewBirthYear = ({ authors, editAuthor }) => {
+  const [name, setName] = useState(authors[0].name)
   const [born, setBorn] = useState('')
 
   const submit = async (e) => {
@@ -10,21 +10,23 @@ const NewBirthYear = ({ editAuthor }) => {
       variables: { name, born }
     })
 
-    setName('')
+    setName(authors[0].name)
     setBorn('')
   }
 
   return (
     <div>
-      <h3>Set year of birth</h3>
+      <h4>Set year of birth</h4>
+
       <form onSubmit={submit}>
         <div>
-          Name
-          <input
+          <select
             value={name}
             onChange={({ target }) => setName(target.value)}
-          />
-        </div>
+          >
+            {authors.map(a => <option key={a.id} value={a.name}>{a.name}</option>)}
+          </select>
+          </div>
         <div>
           Born
           <input
