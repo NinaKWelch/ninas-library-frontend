@@ -1,6 +1,10 @@
 import React from 'react'
 
-const Authors = ({ result }) => {
+const Authors = ({ show, result }) => {
+  if (!show) {
+    return null
+  }
+
   if (result.loading) {
     return <div>Loading...</div>
   }
