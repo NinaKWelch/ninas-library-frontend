@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
+import { useQuery, useMutation, useSubscription, useApolloClient } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
 import Books from './components/Books'
@@ -7,20 +7,8 @@ import Recommend from './components/Recommend'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 
-const ALL_AUTHORS = gql`
-{
-  allAuthors  {
-    name
-    born
-    bookCount
-    id
-  }
-}
-`
-
-const ALL_BOOKS = gql`
-{
-  allBooks  {
+const BOOK_DETAILS = gql`
+  fragment BookDetails on Book {
     title
     author {
       name
@@ -29,15 +17,33 @@ const ALL_BOOKS = gql`
     genres
     id
   }
-}
+`
+const ALL_AUTHORS = gql`
+  {
+    allAuthors  {
+      name
+      born
+      bookCount
+      id
+    }
+  }
+`
+
+const ALL_BOOKS = gql`
+  {
+    allBooks  {
+      ...BookDetails
+    }
+  }
+  ${BOOK_DETAILS}  
 `
 
 const CURRENT_USER = gql`
-{
-  me {
-    favoriteGenre
+  {
+    me {
+      favoriteGenre
+    }
   }
-}
 `
 
 const ADD_NEW_BOOK = gql`
@@ -48,15 +54,10 @@ const ADD_NEW_BOOK = gql`
       published: $published,
       genres: $genres
     ) {
-      title
-      author {
-        name
-      }
-      published
-      genres
-      id
+      ...BookDetails
     }
   }
+  ${BOOK_DETAILS}
 `
 
 const EDIT_BIRTHYEAR = gql`
@@ -77,9 +78,26 @@ const LOGIN = gql`
   }
 `
 
+const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+    }
+  } 
+  ${BOOK_DETAILS}
+ `
+
 const App = () => {
+  const [message, setMessage] = useState(null)
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
+
+  const notify = (message) => {
+    setMessage(message)
+    setTimeout(() => {
+      setMessage(null)
+    }, 10000)
+  }
 
   const client = useApolloClient()
 
@@ -87,11 +105,36 @@ const App = () => {
   const books = useQuery(ALL_BOOKS)
   const user = useQuery(CURRENT_USER)
 
+  const updateCacheWith = (newBook) => {
+    const includedIn = (set, object) => 
+      set.map(b => b.id).includes(object.id)  
+
+    const dataInStore = client.readQuery({ query: ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, newBook)) {
+      dataInStore.allBooks.push(newBook)
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: dataInStore
+      })
+    }   
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const newBook = subscriptionData.data.bookAdded
+      notify(`${newBook.title} added`)
+      updateCacheWith(newBook)
+    }
+  })
+
   const [addBook] = useMutation(ADD_NEW_BOOK, {
     refetchQueries: [
       { query: ALL_AUTHORS },
       { query: ALL_BOOKS }
-    ]
+    ],
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook)
+    }
   })
 
   const [editAuthor] = useMutation(EDIT_BIRTHYEAR)
@@ -106,6 +149,11 @@ const App = () => {
 
   return (
     <div>
+      {message &&
+        <div style={{color: 'green'}}>
+          {message}
+        </div>
+      }
       <div>
         <button onClick={() => setPage('authors')}>Authors</button>
         <button onClick={() => setPage('books')}>Books</button>
