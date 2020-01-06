@@ -42,7 +42,6 @@ const Authors = ({ show, result, editAuthor, token }) => {
           />
         : ''
       }
-      
     </div>
   )
 }

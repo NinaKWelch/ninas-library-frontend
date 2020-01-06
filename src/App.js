@@ -3,6 +3,7 @@ import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
 import Books from './components/Books'
+import Recommend from './components/Recommend'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 
@@ -27,6 +28,14 @@ const ALL_BOOKS = gql`
     published
     genres
     id
+  }
+}
+`
+
+const CURRENT_USER = gql`
+{
+  me {
+    favoriteGenre
   }
 }
 `
@@ -76,6 +85,7 @@ const App = () => {
 
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+  const user = useQuery(CURRENT_USER)
 
   const [addBook] = useMutation(ADD_NEW_BOOK, {
     refetchQueries: [
@@ -102,6 +112,7 @@ const App = () => {
         {token
           ? <span>
               <button onClick={() => setPage('add')}>Add book</button>
+              <button onClick={() => setPage('recommend')}>Recommend</button>
               <button onClick={logout}>Logout</button>
             </span>   
           : <button onClick={() => setPage('login')}>Login</button>
@@ -118,6 +129,12 @@ const App = () => {
       <Books
         show={page === 'books'}
         result={books}
+      />
+
+      <Recommend
+        show={page === 'recommend'}
+        result={books}
+        user={user}
       />
 
       <NewBook
