@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useQuery, useMutation } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import LoginForm from './components/LoginForm'
 
 const ALL_AUTHORS = gql`
 {
@@ -20,7 +21,9 @@ const ALL_BOOKS = gql`
 {
   allBooks  {
     title
-    author
+    author {
+      name
+    }
     published
     id
   }
@@ -28,7 +31,7 @@ const ALL_BOOKS = gql`
 `
 
 const ADD_NEW_BOOK = gql`
-  mutation addNewBook($title: String!, $author: String!, $published: String!, $genres: [String!]!) {
+  mutation addNewBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
     addBook(
       title: $title,
       author: $author,
@@ -36,7 +39,9 @@ const ADD_NEW_BOOK = gql`
       genres: $genres
     ) {
       title
-      author
+      author {
+        name
+      }
       published
       genres
       id
@@ -45,7 +50,7 @@ const ADD_NEW_BOOK = gql`
 `
 
 const EDIT_BIRTHYEAR = gql`
-mutation editBirthyear($name: String!, $born: String!) {
+mutation editBirthyear($name: String!, $born: Int!) {
   editAuthor(name: $name, setBornTo: $born)  {
     name
     born
@@ -54,34 +59,59 @@ mutation editBirthyear($name: String!, $born: String!) {
 }
 `
 
+const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password)  {
+      value
+    }
+  }
+`
+
 const App = () => {
   const [page, setPage] = useState('authors')
+  const [token, setToken] = useState(null)
+
+  const client = useApolloClient()
+
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+
   const [addBook] = useMutation(ADD_NEW_BOOK, {
     refetchQueries: [
-      {
-        query: ALL_AUTHORS
-      },
-      {
-        query: ALL_BOOKS
-      }
+      { query: ALL_AUTHORS },
+      { query: ALL_BOOKS }
     ]
   })
+
   const [editAuthor] = useMutation(EDIT_BIRTHYEAR)
+
+  const [login] = useMutation(LOGIN)
+
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
 
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>Authors</button>
         <button onClick={() => setPage('books')}>Books</button>
-        <button onClick={() => setPage('add')}>Add book</button>
+        {token
+          ? <span>
+              <button onClick={() => setPage('add')}>Add book</button>
+              <button onClick={logout}>Logout</button>
+            </span>   
+          : <button onClick={() => setPage('login')}>Login</button>
+        }
       </div>
 
       <Authors
         show={page === 'authors'}
         result={authors}
         editAuthor={editAuthor}
+        token={token}
       />
 
       <Books
@@ -92,6 +122,13 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         addBook={addBook}
+      />
+
+      <LoginForm
+        show={page === 'login'}
+        login={login}
+        setToken={(token) => setToken(token)}
+        handlePage={setPage}
       />
     </div>
   )

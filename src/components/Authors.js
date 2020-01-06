@@ -1,7 +1,7 @@
 import React from 'react'
 import NewBirthYear from './NewBirthYear'
 
-const Authors = ({ show, result, editAuthor }) => {
+const Authors = ({ show, result, editAuthor, token }) => {
   if (!show) {
     return null
   }
@@ -35,10 +35,14 @@ const Authors = ({ show, result, editAuthor }) => {
         </tbody>
       </table>
       
-      <NewBirthYear
-        authors={result.data.allAuthors}
-        editAuthor={editAuthor}
-      />
+      {token
+        ? <NewBirthYear
+            authors={result.data.allAuthors}
+            editAuthor={editAuthor}
+          />
+        : ''
+      }
+      
     </div>
   )
 }
