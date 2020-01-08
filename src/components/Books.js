@@ -1,8 +1,26 @@
 import React, { useState } from 'react'
+import { gql } from 'apollo-boost'
 import BookList from './BookList'
 
-const Books = ({ show, result }) => {
-  const [genre, setGenre] = useState('all')
+const FIND_BOOKS = gql`
+  query findBooksByGenre($genreToSearch: String!) {
+    allBooks(genre: $genreToSearch) {
+      title
+      author {
+        name
+        born
+        bookCount
+        id
+      }
+      published
+      genres
+      id
+    }
+  }
+`
+
+const Books = ({ show, result, client }) => {
+  const [booksToShow, setBooksToShow] = useState(null)
 
   if (!show) {
     return null
@@ -10,6 +28,15 @@ const Books = ({ show, result }) => {
 
   if (result.loading) {
     return <div>Loading...</div>
+  }
+
+  const showBooks = async (genre) => {
+    const { data } = await client.query({
+      query: FIND_BOOKS,
+      variables: { genreToSearch: genre }
+    })
+    
+    setBooksToShow(data.allBooks)
   }
 
   const listGenders = () => {
@@ -24,7 +51,7 @@ const Books = ({ show, result }) => {
     )
 
     return uniqueGenres.map(g =>
-      <button key={g} onClick={() => setGenre(g)}>
+      <button key={g} onClick={() => showBooks(g)}>
         {g}
       </button>
     )
@@ -34,11 +61,14 @@ const Books = ({ show, result }) => {
     <div>
       <h2>Books</h2>
 
-      <BookList books={result.data.allBooks} genre={genre} />
+      {booksToShow 
+        ? <BookList books={booksToShow} />
+        : <BookList books={result.data.allBooks} />
+      }
 
       <div>
         {listGenders()}
-        <button onClick={() => setGenre('all')}>all genres</button>
+        <button onClick={() => setBooksToShow(null)}>all genres</button>
       </div>
     </div>
   )

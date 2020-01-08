@@ -1,16 +1,13 @@
 import React from 'react'
 
-const BookList = ({ books, genre }) => {
-
-  const filterByGenre = () => genre !== 'all'
-    ? books.filter(a => a.genres.includes(genre))
-    : books
-
+const BookList = ({ books }) => {
   return (
     <table>
       <tbody>
         <tr>
-          <th></th>
+          <th>
+            Book
+          </th>
           <th>
             Author
           </th>
@@ -19,7 +16,7 @@ const BookList = ({ books, genre }) => {
           </th>
         </tr>
 
-        {filterByGenre().map(a =>
+        {books.map(a =>
           <tr key={a.id}>
             <td>{a.title}</td>
             <td>{a.author.name}</td>

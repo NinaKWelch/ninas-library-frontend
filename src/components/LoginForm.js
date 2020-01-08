@@ -29,6 +29,7 @@ const LoginForm = ({ show, login, setToken, handlePage }) => {
       <form onSubmit={submit}>
         <div>
           username <input
+            autoComplete='username'
             value={username}
             onChange={({ target }) => setUsername(target.value)}
           />
@@ -36,6 +37,7 @@ const LoginForm = ({ show, login, setToken, handlePage }) => {
         <div>
           password <input
             type='password'
+            autoComplete='current-password'
             value={password}
             onChange={({ target }) => setPassword(target.value)}
           />

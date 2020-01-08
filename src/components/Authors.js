@@ -17,7 +17,9 @@ const Authors = ({ show, result, editAuthor, token }) => {
       <table>
         <tbody>
           <tr>
-            <th></th>
+            <th>
+              Author
+            </th>
             <th>
               Born
             </th>

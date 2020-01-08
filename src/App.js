@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Query, ApolloConsumer } from 'react-apollo'
 import { useQuery, useMutation, useSubscription, useApolloClient } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
@@ -211,10 +212,19 @@ const App = () => {
         token={token}
       />
 
-      <Books
-        show={page === 'books'}
-        result={books}
-      />
+      <ApolloConsumer>
+        {(client => 
+          <Query query={ALL_BOOKS}>
+            {(result) => 
+              <Books
+                show={page === 'books'}
+                result={result}
+                client={client}    
+              /> 
+            }
+          </Query> 
+        )}
+      </ApolloConsumer>
 
       <Recommend
         show={page === 'recommend'}
