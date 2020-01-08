@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import BookList from './BookList'
 
 const Books = ({ show, result }) => {
   const [genre, setGenre] = useState('all')
@@ -29,34 +30,11 @@ const Books = ({ show, result }) => {
     )
   }
 
-  const filterByGenre = genre => genre !== 'all'
-    ? result.data.allBooks.filter(a => a.genres.includes(genre))
-    : result.data.allBooks
-
   return (
     <div>
       <h2>Books</h2>
 
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>
-              Author
-            </th>
-            <th>
-              Published
-            </th>
-          </tr>
-          {filterByGenre(genre).map(a =>
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <BookList books={result.data.allBooks} genre={genre} />
 
       <div>
         {listGenders()}

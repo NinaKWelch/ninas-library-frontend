@@ -7,26 +7,35 @@ import Recommend from './components/Recommend'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 
+const AUTHOR_DETAILS = gql`
+  fragment AuthorDetails on Author {
+    name
+    born
+    bookCount
+    id
+  }
+`
+
 const BOOK_DETAILS = gql`
   fragment BookDetails on Book {
     title
     author {
-      name
+      ...AuthorDetails
     }
     published
     genres
     id
   }
+  ${AUTHOR_DETAILS} 
 `
+
 const ALL_AUTHORS = gql`
   {
     allAuthors  {
-      name
-      born
-      bookCount
-      id
+      ...AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS} 
 `
 
 const ALL_BOOKS = gql`
@@ -47,7 +56,7 @@ const CURRENT_USER = gql`
 `
 
 const ADD_NEW_BOOK = gql`
-  mutation addNewBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
+  mutation addNewBook($title: String!, $author: String!, $published: String!, $genres: [String!]!) {
     addBook(
       title: $title,
       author: $author,
@@ -61,13 +70,15 @@ const ADD_NEW_BOOK = gql`
 `
 
 const EDIT_BIRTHYEAR = gql`
-mutation editBirthyear($name: String!, $born: Int!) {
-  editAuthor(name: $name, setBornTo: $born)  {
-    name
-    born
-    id
+  mutation editBirthyear($name: String!, $born: String!) {
+    editAuthor(
+      name: $name,
+      setBornTo: $born
+    ) {
+      ...AuthorDetails
+    }
   }
-}
+  ${AUTHOR_DETAILS}
 `
 
 const LOGIN = gql`
@@ -85,15 +96,25 @@ const BOOK_ADDED = gql`
     }
   } 
   ${BOOK_DETAILS}
- `
+`
 
 const App = () => {
   const [message, setMessage] = useState(null)
-  const [page, setPage] = useState('authors')
+  const [type, setType] = useState('')
+  const [page, setPage] = useState('books')
   const [token, setToken] = useState(null)
 
-  const notify = (message) => {
+  const notify = (message, type) => {
     setMessage(message)
+    setType(type)
+    setTimeout(() => {
+      setMessage(null)
+    }, 10000)
+  }
+
+  const handleError = error => {
+    setMessage(error.graphQLErrors[0].message)
+    setType('error')
     setTimeout(() => {
       setMessage(null)
     }, 10000)
@@ -105,52 +126,68 @@ const App = () => {
   const books = useQuery(ALL_BOOKS)
   const user = useQuery(CURRENT_USER)
 
-  const updateCacheWith = (newBook) => {
+  const updateCacheWith = newBook => {
     const includedIn = (set, object) => 
-      set.map(b => b.id).includes(object.id)  
+      set.map(x => x.id).includes(object.id)
+    
+    const bookData = client.readQuery({ query: ALL_BOOKS })
+    const authorData = client.readQuery({ query: ALL_AUTHORS })
+    const author = newBook.author
 
-    const dataInStore = client.readQuery({ query: ALL_BOOKS })
-    if (!includedIn(dataInStore.allBooks, newBook)) {
-      dataInStore.allBooks.push(newBook)
+    if (!includedIn(bookData.allBooks, newBook)) {
+      bookData.allBooks.push(newBook)
       client.writeQuery({
         query: ALL_BOOKS,
-        data: dataInStore
+        data: bookData
       })
-    }   
+    }
+
+    if (!includedIn(authorData.allAuthors, author)) {
+      authorData.allAuthors.push(author)
+      client.writeQuery({
+        query: ALL_AUTHORS,
+        data: authorData
+      })
+    } else {
+      authorData.allAuthors.map(a => 
+        a.id !== author.id ? a : { ...author, bookCount: author.bookCount + 1 }
+      )
+    }
   }
 
   useSubscription(BOOK_ADDED, {
     onSubscriptionData: ({ subscriptionData }) => {
       const newBook = subscriptionData.data.bookAdded
-      notify(`${newBook.title} added`)
+      notify(`${newBook.title} by ${newBook.author.name} added`, 'success')
       updateCacheWith(newBook)
     }
   })
 
   const [addBook] = useMutation(ADD_NEW_BOOK, {
-    refetchQueries: [
-      { query: ALL_AUTHORS },
-      { query: ALL_BOOKS }
-    ],
+    onError: handleError,
     update: (store, response) => {
       updateCacheWith(response.data.addBook)
     }
   })
 
-  const [editAuthor] = useMutation(EDIT_BIRTHYEAR)
+  const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
+    onError: handleError
+  })
 
-  const [login] = useMutation(LOGIN)
+  const [login] = useMutation(LOGIN, {
+    onError: handleError
+  })
 
   const logout = () => {
     setToken(null)
     localStorage.clear()
     client.resetStore()
   }
-
+  
   return (
     <div>
       {message &&
-        <div style={{color: 'green'}}>
+        <div style={{ color: type === 'success' ? 'green' : 'red' }}>
           {message}
         </div>
       }

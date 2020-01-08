@@ -33,7 +33,7 @@ const NewBirthYear = ({ authors, editAuthor }) => {
           <input
             type='number'
             value={born}
-            onChange={({ target }) => setBorn(Number(target.value))}
+            onChange={({ target }) => setBorn(target.value)}
           />
         </div>
         <button type='submit'>Update Author</button>

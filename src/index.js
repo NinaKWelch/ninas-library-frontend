@@ -21,7 +21,7 @@ const wsLink = new WebSocketLink({
 })
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: 'http://localhost:4000/graphql'
 })
 
 const authLink = setContext((_, { headers }) => {
@@ -29,7 +29,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `bearer ${token}` : null,
+      authorization: token ? `bearer ${token}` : null
     }
   }
 })
@@ -40,7 +40,7 @@ const link = split(
     return kind === 'OperationDefinition' && operation === 'subscription'
   },
   wsLink,
-  authLink.concat(httpLink),
+  authLink.concat(httpLink)
 )
 
 const client = new ApolloClient({
@@ -49,7 +49,7 @@ const client = new ApolloClient({
 })
 
 ReactDOM.render(
-  <ApolloProvider client={client} >
+  <ApolloProvider client={client}>
     <App />
   </ApolloProvider>, 
   document.getElementById('root')
