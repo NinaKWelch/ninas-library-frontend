@@ -5,6 +5,10 @@ const Recommend = ({ show, result, user }) => {
   if (!show) {
     return null
   }
+
+  if (!user.data.me) {
+    return null
+  }
   
   if (result.loading) {
     return <div>Loading...</div>
@@ -19,7 +23,7 @@ const Recommend = ({ show, result, user }) => {
 
       <p>Books in your favorite genre <strong>{genre}</strong>:</p>
 
-      {favoriteGenre.length > 0
+      {favoriteGenre.length > 0 || !genre
         ? <BookList books={favoriteGenre} />
         : <p>No books currently, add some!</p>
       }

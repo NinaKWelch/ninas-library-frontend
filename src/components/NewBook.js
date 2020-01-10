@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const NewBook = ({ show, addBook }) => {
+const NewBook = ({ show, addBook, token }) => {
   const [title, setTitle] = useState('')
   const [author, setAuhtor] = useState('')
   const [published, setPublished] = useState('')
@@ -8,6 +8,10 @@ const NewBook = ({ show, addBook }) => {
   const [genres, setGenres] = useState([])
 
   if (!show) {
+    return null
+  }
+
+  if (!token) {
     return null
   }
 
@@ -29,42 +33,63 @@ const NewBook = ({ show, addBook }) => {
     setGenre('')
   }
 
+  const mainStyle = {
+    width: 220,
+    marginTop: 20,
+    padding: '0 0 20px 20px',
+    border: '1px solid #000'
+  }
+
+  const inputStyle = {
+    paddingBottom: 10
+  }
+
   return (
-    <div>
+    <div style={mainStyle}>
+      <h3 style={{ textAlign: 'center' }}>Add a Book</h3>
+
       <form onSubmit={submit}>
-        <div>
+        <div style={inputStyle}>
           Title
           <input
             value={title}
             onChange={({ target }) => setTitle(target.value)}
+            style={{ marginLeft: 7 }}
           />
         </div>
-        <div>
+        <div style={inputStyle}>
           Author
           <input
             value={author}
             onChange={({ target }) => setAuhtor(target.value)}
+            style={{ marginLeft: 7 }}
           />
         </div>
-        <div>
+        <div style={inputStyle}>
           Published
           <input
             type='number'
             value={published}
             onChange={({ target }) => setPublished(target.value)}
+            style={{ marginLeft: 7 }}
           />
         </div>
-        <div>
+        <div style={inputStyle}>
           <input
             value={genre}
             onChange={({ target }) => setGenre(target.value)}
           />
-          <button onClick={addGenre} type="button">Add genre</button>
+          <button onClick={addGenre} type="button" style={{ marginLeft: 7 }}>
+          Add genre
+          </button>
         </div>
         <div>
           Genres: {genres.join(' ')}
         </div>
-        <button type='submit'>Ceate book</button>
+        <div style={{ marginTop: 14, textAlign: 'center' }}>
+          <button type='submit'>Ceate book</button>        
+        </div>
+
       </form>
     </div>
   )

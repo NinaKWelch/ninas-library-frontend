@@ -51,7 +51,7 @@ const Books = ({ show, result, client }) => {
     )
 
     return uniqueGenres.map(g =>
-      <button key={g} onClick={() => showBooks(g)}>
+      <button key={g} onClick={() => showBooks(g)} style={{ marginRight: 7 }}>
         {g}
       </button>
     )
@@ -66,7 +66,7 @@ const Books = ({ show, result, client }) => {
         : <BookList books={result.data.allBooks} />
       }
 
-      <div>
+      <div style={{ marginTop: 20 }}>
         {listGenders()}
         <button onClick={() => setBooksToShow(null)}>all genres</button>
       </div>

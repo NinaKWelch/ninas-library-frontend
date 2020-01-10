@@ -10,6 +10,16 @@ const Authors = ({ show, result, editAuthor, token }) => {
     return <div>Loading...</div>
   }
 
+  const headerStyle = {
+    textAlign: 'left',
+    paddingBottom: 7,
+    borderBottom: '1px solid #000'
+  }
+
+  const listStyle = {
+    paddingRight: 25
+  }
+
   return (
     <div>
       <h2>Authors</h2>
@@ -17,21 +27,21 @@ const Authors = ({ show, result, editAuthor, token }) => {
       <table>
         <tbody>
           <tr>
-            <th>
+            <th style={headerStyle}>
               Author
             </th>
-            <th>
+            <th style={headerStyle}>
               Born
             </th>
-            <th>
+            <th style={headerStyle}>
               Books
             </th>
           </tr>
           {result.data.allAuthors.map(a =>
             <tr key={a.name}>
-              <td>{a.name}</td>
-              <td>{a.born}</td>
-              <td>{a.bookCount}</td>
+              <td style={listStyle}>{a.name}</td>
+              <td style={listStyle}>{a.born}</td>
+              <td style={listStyle}>{a.bookCount}</td>
             </tr>
           )}
         </tbody>

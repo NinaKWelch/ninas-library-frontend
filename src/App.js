@@ -184,6 +184,10 @@ const App = () => {
     localStorage.clear()
     client.resetStore()
   }
+
+  const buttonStyle = {
+    marginRight: 7
+  }
   
   return (
     <div>
@@ -193,12 +197,12 @@ const App = () => {
         </div>
       }
       <div>
-        <button onClick={() => setPage('authors')}>Authors</button>
-        <button onClick={() => setPage('books')}>Books</button>
+        <button onClick={() => setPage('authors')} style={buttonStyle}>Authors</button>
+        <button onClick={() => setPage('books')} style={buttonStyle}>Books</button>
         {token
           ? <span>
-              <button onClick={() => setPage('add')}>Add book</button>
-              <button onClick={() => setPage('recommend')}>Recommend</button>
+              <button onClick={() => setPage('add')} style={buttonStyle}>Add book</button>
+              <button onClick={() => setPage('recommend')} style={buttonStyle}>Recommend</button>
               <button onClick={logout}>Logout</button>
             </span>   
           : <button onClick={() => setPage('login')}>Login</button>
@@ -235,6 +239,7 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         addBook={addBook}
+        token={token}
       />
 
       <LoginForm
